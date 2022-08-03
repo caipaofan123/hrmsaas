@@ -12,8 +12,17 @@ export function login(data) {
     })
 }
 
-export function getInfo(token) {
+export function getUserInfo() {
+    return request({
+        url:'/sys/profile',
+        method: 'POST',
+    })
+}
 
+export function getUserBaseInfo (id){
+    return request({
+        url:'/sys/user/' + id
+    })
 }
 
 export function logout() {

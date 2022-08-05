@@ -4,9 +4,9 @@
       <el-card class="box-card">
         <treetools :treeNode="company" :isRoot="true"></treetools>
         <el-tree :data="departs" :props="defaultProps" default-expand-all>
-            <template v-slot='{data}'>
-              <treetools :treeNode="data"> </treetools>
-            </template>
+          <template v-slot="{ data }">
+            <treetools :treeNode="data"> </treetools>
+          </template>
         </el-tree>
       </el-card>
     </div>
@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import { change } from '@/utils'
+import { getDeptsApi } from '@/api/department'
 import treetools from './components/tree-tools.vue'
 export default {
   data() {
@@ -32,12 +34,18 @@ export default {
   components: {
     treetools,
   },
-  created() {},
+  created() {
+    this.getDepts()
+  },
 
-  methods: {},
+  methods: {
+    async getDepts() {
+      const res = await getDeptsApi()
+      console.log(res)
+      this.departs = change(res.depts, '')
+    },
+  },
 }
 </script>
 
-<style scoped lang="scss">
-
-</style>
+<style scoped lang="scss"></style>

@@ -115,3 +115,18 @@ export function param2Obj(url) {
   })
   return obj
 }
+
+
+export const change=(data,pid)=>{
+  const arr=[]
+  data.forEach((item)=>{
+      if (item.pid===pid) {
+          const children =change(data,item.id)
+          if (children.length) {
+              item.children=children
+          }
+          arr.push(item)
+      }
+  })
+  return arr
+}

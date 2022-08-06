@@ -7,12 +7,13 @@
           <template v-slot="{ data }">
             <treetools :treeNode="data" @remove='getDepts' 
             @add='showAddDept'
+            @edit='showEditDept'
             > </treetools>
           </template>
         </el-tree>
       </el-card>
     </div>
-    <add-depts @add='getDepts' :visible.sync='dialogVisible' :currentNode='currentNode'></add-depts>
+    <add-depts @add='getDepts' :visible.sync='dialogVisible' :currentNode='currentNode' ref="addDepts"></add-depts>
   </div>
 </template>
 
@@ -54,6 +55,11 @@ export default {
     showAddDept(val){
       this.dialogVisible=true
       this.currentNode=val
+    },
+    showEditDept(val){
+      this.dialogVisible=true
+      this.$refs.addDepts.getDeptById(val.id)
+  
     }
   },
 }

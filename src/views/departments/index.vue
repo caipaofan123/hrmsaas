@@ -2,18 +2,22 @@
   <div class="dashboard-container">
     <div class="app-container">
       <el-card class="box-card">
-        <treetools :treeNode="company" :isRoot="true"></treetools>
+        <treetools :treeNode="company" :isRoot="true" @add='dialogVisible=true'></treetools>
         <el-tree :data="departs" :props="defaultProps" default-expand-all>
           <template v-slot="{ data }">
-            <treetools :treeNode="data"> </treetools>
+            <treetools :treeNode="data" @remove='getDepts' 
+            @add='showAddDept'
+            > </treetools>
           </template>
         </el-tree>
       </el-card>
     </div>
+    <add-depts @add='getDepts' :visible.sync='dialogVisible' :currentNode='currentNode'></add-depts>
   </div>
 </template>
 
 <script>
+import addDepts from './components/add-depts.vue'
 import { change } from '@/utils'
 import { getDeptsApi } from '@/api/department'
 import treetools from './components/tree-tools.vue'
@@ -29,10 +33,13 @@ export default {
         { name: '人事部' },
       ],
       company: { name: '江苏传智播客教育科技股份有限公司', manager: '负责人' },
+      dialogVisible:false,
+      currentNode:{}
     }
   },
   components: {
     treetools,
+    addDepts
   },
   created() {
     this.getDepts()
@@ -44,6 +51,10 @@ export default {
       console.log(res)
       this.departs = change(res.depts, '')
     },
+    showAddDept(val){
+      this.dialogVisible=true
+      this.currentNode=val
+    }
   },
 }
 </script>

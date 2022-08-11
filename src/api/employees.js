@@ -5,3 +5,10 @@ export function getEmployeesApi(){
         url:'/sys/user/simple'
     })
 }
+
+export function getEmployeesListApi(params){
+    return request({
+        url:'/sys/user',
+        params
+    })
+}

@@ -15,6 +15,7 @@ import router from './router'
 import '@/icons' // icon
 import '@/permission' // permission control
 import * as directives from '@/directives'
+import * as filters from '@/filters'
 import components from '@/components'
 console.log(directives);
 Vue.use(components)
@@ -40,6 +41,10 @@ Vue.config.productionTip = false
 
 for (let key in directives) {
   Vue.directive(key,directives[key])
+}
+
+for(let key in filters){
+  Vue.filter(key,filters[key])
 }
 
 

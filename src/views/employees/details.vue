@@ -2,8 +2,8 @@
   <div class="dashboard-container">
     <div class="app-container">
       <el-card>
-        <el-tabs>
-          <el-tab-pane label="登录账户设置">
+        <el-tabs @tab-click="tabHandleClick" v-model="activeName">
+          <el-tab-pane label="登录账户设置" name='acount'>
             <!-- 放置表单 -->
             <el-form
               label-width="120px"
@@ -24,10 +24,10 @@
               </el-form-item>
             </el-form>
           </el-tab-pane>
-          <el-tab-pane label="个人详情" >
+          <el-tab-pane label="个人详情" name='user'>
             <userInfo></userInfo>
           </el-tab-pane>
-          <el-tab-pane label="岗位信息" />
+          <el-tab-pane label="岗位信息" name='job'/>
         </el-tabs>
       </el-card>
     </div>
@@ -37,6 +37,7 @@
 <script>
 import { getUserBaseInfo, saveUserDetailById } from '@/api/user'
 import userInfo from './components/user-info'
+import Cookies from 'js-cookie'
 export default {
   data() {
     return {
@@ -44,11 +45,12 @@ export default {
         // username:'',
         // password:''
       },
+      activeName: Cookies.get('employeesDetailTab') || 'acount',
     }
   },
-    components:{
-        userInfo
-    },
+  components: {
+    userInfo,
+  },
   created() {
     this.getUserInfo()
   },
@@ -61,6 +63,9 @@ export default {
     async onSave() {
       await saveUserDetailById(this.formData)
       this.$message.success('修改成功')
+    },
+    tabHandleClick() {
+      Cookies.set('employeesDetailTab', this.activeName)
     },
   },
 }

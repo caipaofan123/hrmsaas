@@ -4,9 +4,18 @@
       <page-tools>
         <span slot="text">共166条记录</span>
         <template slot="right">
-          <el-button size="small" type="warning" @click='$router.push("/import")'>导入</el-button>
-          <el-button size="small" type="danger">导出</el-button>
-          <el-button size="small" type="primary" @click="add">新增员工</el-button>
+          <el-button
+            size="small"
+            type="warning"
+            @click="$router.push('/import')"
+            >导入</el-button
+          >
+          <el-button size="small" type="danger" @click="Export2Excel"
+            >导出</el-button
+          >
+          <el-button size="small" type="primary" @click="add"
+            >新增员工</el-button
+          >
         </template>
       </page-tools>
       <!-- 放置表格和分页 -->
@@ -42,24 +51,26 @@
               {{ row.timeOfEntry | formatTime }}
             </template>
           </el-table-column>
-          <el-table-column label="账户状态" sortable="" >
-            <template slot-scope="{row}">
+          <el-table-column label="账户状态" sortable="">
+            <template slot-scope="{ row }">
               <el-switch
-                :value="row.enableState===1"
+                :value="row.enableState === 1"
                 active-color="hotpink"
-                inactive-color="#ff4949"
+                inactive-color="hotpink"
               >
               </el-switch>
             </template>
           </el-table-column>
           <el-table-column label="操作" sortable="" fixed="right" width="280">
-            <template slot-scope="{row}">
+            <template slot-scope="{ row }">
               <el-button type="text" size="small">查看</el-button>
               <el-button type="text" size="small">转正</el-button>
               <el-button type="text" size="small">调岗</el-button>
               <el-button type="text" size="small">离职</el-button>
               <el-button type="text" size="small">角色</el-button>
-              <el-button type="text" size="small" @click='delEmployee(row.id)'>删除</el-button>
+              <el-button type="text" size="small" @click="delEmployee(row.id)"
+                >删除</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -82,15 +93,15 @@
         </el-row>
       </el-card>
     </div>
-    <addEmployees :visible.sync='visible' @add-success='getEmployeesList' />
+    <addEmployees :visible.sync="visible" @add-success="getEmployeesList" />
   </div>
 </template>
 
 <script>
-
 import addEmployees from './components/add-employees.vue'
 import employees from '@/constant/employees'
-import { getEmployeesListApi ,delEmployee} from '@/api/employees'
+import { getEmployeesListApi, delEmployee } from '@/api/employees'
+const { exportExcelMapPath ,hireType} = employees
 export default {
   data() {
     return {
@@ -100,11 +111,11 @@ export default {
         size: 5,
       },
       total: 0,
-      visible:false
+      visible: false,
     }
   },
-  components:{
-    addEmployees
+  components: {
+    addEmployees,
   },
   created() {
     this.getEmployeesList()
@@ -136,16 +147,43 @@ export default {
       const findItem = employees.hireType.find((item) => item.id === cellValue)
       return findItem ? findItem.value : '未知'
     },
-    async delEmployee(id){
+    async delEmployee(id) {
       this.$confirm('你确认删除该员工？')
       const res = await delEmployee(id)
-      console.log(res);
+      console.log(res)
       this.$$message.success('删除成功')
       this.getEmployeesList()
     },
-    add(){
-      this.visible=true
-    }
+    add() {
+      this.visible = true
+    },
+    async Export2Excel() {
+      const { export_json_to_excel } = await import('@/vendor/Export2Excel')
+      const { rows } = await getEmployeesListApi({
+        page: 1,
+        size: this.total,
+      })
+      const header = Object.keys(exportExcelMapPath)
+      const data = rows.map((item) => {
+        return header.map((h) => {
+          if (h === '聘用形式') {
+            const findItem = hireType.find((hire) => {
+              return hire.id === item[exportExcelMapPath[h]]
+            })
+            return findItem ? findItem.value : '未知'
+          } else {
+            return item[exportExcelMapPath[h]]
+          }
+        })
+      })
+      export_json_to_excel({
+        header,
+        data, //具体数据 必填
+        filename: '员工列表', //非必填
+        autoWidth: true, //非必填
+        bookType: 'xlsx', //非必填
+      })
+    },
   },
 }
 </script>

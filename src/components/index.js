@@ -1,5 +1,6 @@
 import pageTools from '@/components/pageTools'
-const components = [pageTools]
+import uploadImg from '@/components/UploadImg'
+const components = [pageTools,uploadImg]
 export default {
     install(Vue){
         // Vue.component('pageTools',pageTools)

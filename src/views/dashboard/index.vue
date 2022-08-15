@@ -1,6 +1,7 @@
 <template>
   <div class="dashboard-container">
-    <div class="dashboard-text">name: {{ name }}</div>
+    <div class="dashboard-text">恭喜发财</div>
+    <uploadImg @onSuccess='onSuccess1' />
   </div>
 </template>
 
@@ -13,6 +14,11 @@ export default {
     ...mapGetters([
       'name'
     ])
+  },
+  methods:{
+    onSuccess1({url}){
+      console.log('发送请求'+ url);
+    }
   }
 }
 </script>
@@ -21,10 +27,12 @@ export default {
 .dashboard {
   &-container {
     margin: 30px;
+    background-color: gold;
   }
   &-text {
-    font-size: 30px;
-    line-height: 46px;
+    font-size: 100px;
+    line-height: 200px;
+    color: hotpink;
   }
 }
 </style>

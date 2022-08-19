@@ -35,6 +35,7 @@
                   padding: 10px;
                 "
                 alt=""
+                @click="showErCodeDialog(row.staffPhoto)"
               />
             </template>
           </el-table-column>
@@ -63,7 +64,12 @@
           </el-table-column>
           <el-table-column label="操作" sortable="" fixed="right" width="280">
             <template slot-scope="{ row }">
-              <el-button type="text" size="small" @click="$router.push('/employees/details/'+row.id)">查看</el-button>
+              <el-button
+                type="text"
+                size="small"
+                @click="$router.push('/employees/details/' + row.id)"
+                >查看</el-button
+              >
               <el-button type="text" size="small">转正</el-button>
               <el-button type="text" size="small">调岗</el-button>
               <el-button type="text" size="small">离职</el-button>
@@ -94,14 +100,20 @@
       </el-card>
     </div>
     <addEmployees :visible.sync="visible" @add-success="getEmployeesList" />
+    <el-dialog title="二维码" :visible.sync="ercodeDialog">
+      <el-row type="flex" justify="center">
+        <canvas ref="myCanvas" />
+      </el-row>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import QrCode from 'qrcode'
 import addEmployees from './components/add-employees.vue'
 import employees from '@/constant/employees'
 import { getEmployeesListApi, delEmployee } from '@/api/employees'
-const { exportExcelMapPath ,hireType} = employees
+const { exportExcelMapPath, hireType } = employees
 export default {
   data() {
     return {
@@ -112,6 +124,7 @@ export default {
       },
       total: 0,
       visible: false,
+      ercodeDialog: false,
     }
   },
   components: {
@@ -183,6 +196,18 @@ export default {
         autoWidth: true, //非必填
         bookType: 'xlsx', //非必填
       })
+    },
+    showErCodeDialog(staffPhoto) {
+      if (!staffPhoto) {
+        return this.$message.error('用户没有上传头像')
+      }
+      this.ercodeDialog = true
+      // 有一个方法可以在上一次数据更新完毕，页面渲染完毕之后
+        this.$nextTick(() => {
+          // 此时可以确认已经有ref对象了
+          QrCode.toCanvas(this.$refs.myCanvas, staffPhoto) // 将地址转化成二维码
+          
+        })
     },
   },
 }

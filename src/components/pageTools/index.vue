@@ -38,4 +38,8 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped lang='scss'>
+.box-card{
+  margin: 10px 0;
+}
+</style>

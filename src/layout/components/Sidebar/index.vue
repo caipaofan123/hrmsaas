@@ -31,7 +31,8 @@ export default {
       'sidebar'
     ]),
     routes() {
-      return this.$router.options.routes
+      // return this.$router.options.routes //拿不到我们的动态路由的
+      return this.$store.state.permissions.routes //拿不到我们的动态路由的
     },
     activeMenu() {
       const route = this.$route

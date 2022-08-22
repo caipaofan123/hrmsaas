@@ -1,4 +1,4 @@
-import router from '@/router'
+import router , {asyncRoutes} from '@/router'
 import store from '@/store'
 
 router.beforeEach(async(to, from, next) => {
@@ -6,7 +6,18 @@ router.beforeEach(async(to, from, next) => {
   const wightlist = ['/login', '/404']
   if (token) {
     if (!store.state.user.userInfo.userId) {
-      await store.dispatch('user/getUserInfo')
+      const {roles} = await store.dispatch('user/getUserInfo')
+      console.log(roles.menus);
+      // console.log(asyncRoutes);
+      // const routes=asyncRoutes.filter((item)=>{
+      //   return roles.menus.includes(item.meta.id)
+    // }
+    //   ) 
+    console.log(roles.points);
+      await store.dispatch('permissions/filterRoutes',roles)
+      await store.dispatch('permissions/setPointsAction',roles.points)
+      
+      next(to.path);
     }
     if (to.path === '/login') {
       next('/')

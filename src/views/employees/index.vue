@@ -8,12 +8,15 @@
             size="small"
             type="warning"
             @click="$router.push('/import')"
+            v-isHas='point.employees.import'
             >导入</el-button
           >
           <el-button size="small" type="danger" @click="Export2Excel"
+          v-if="isHas(point.employees.export)"
             >导出</el-button
           >
           <el-button size="small" type="primary" @click="add"
+          v-isHas='point.employees.add'
             >新增员工</el-button
           >
         </template>
@@ -73,8 +76,9 @@
               <el-button type="text" size="small">转正</el-button>
               <el-button type="text" size="small">调岗</el-button>
               <el-button type="text" size="small">离职</el-button>
-              <el-button type="text" size="small">角色</el-button>
+              <el-button type="text" size="small" @click="showAssignRoleDialog(row.id)">角色</el-button>
               <el-button type="text" size="small" @click="delEmployee(row.id)"
+              v-if="isHas(point.employees.del)"
                 >删除</el-button
               >
             </template>
@@ -105,16 +109,21 @@
         <canvas ref="myCanvas" />
       </el-row>
     </el-dialog>
+    <AssignRole :visible.sync="showDialog" :employeesId='employeesId'/>
   </div>
 </template>
 
 <script>
+import mixinsPermission from '@/mixins/permissions'
+// import permissionPoint from '@/constant/permissions'
 import QrCode from 'qrcode'
 import addEmployees from './components/add-employees.vue'
 import employees from '@/constant/employees'
+import AssignRole from '@/views/employees/components/assign-role.vue'
 import { getEmployeesListApi, delEmployee } from '@/api/employees'
 const { exportExcelMapPath, hireType } = employees
 export default {
+  mixins:[mixinsPermission],
   data() {
     return {
       employees: [],
@@ -125,10 +134,14 @@ export default {
       total: 0,
       visible: false,
       ercodeDialog: false,
+      showDialog: false,
+      employeesId:'',
+      // point:permissionPoint
     }
   },
   components: {
     addEmployees,
+    AssignRole
   },
   created() {
     this.getEmployeesList()
@@ -209,6 +222,13 @@ export default {
           
         })
     },
+    showAssignRoleDialog(id){
+      this.showDialog = true
+      this.employeesId=id
+    },
+    // isHas(point){
+    //   return this.$store.state.permissions.points.includes(point)
+    // }
   },
 }
 </script>

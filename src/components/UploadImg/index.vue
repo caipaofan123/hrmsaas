@@ -2,49 +2,75 @@
   <div>
     <el-upload
       v-loading="loading"
-      element-loading-text="拼命加载中"
+      element-loading-text="上传中"
       element-loading-spinner="el-icon-loading"
-      element-loading-background="rgba(0, 0, 0, 0.8)"
+      element-loading-background="rgba(0, 0, 0, 0.3)"
+      :file-list="fileList"
       action="#"
       :http-request="onRequest"
-      list-type="picture-card"
-      :file-list="fileList"
       :on-change="onChange"
       :on-remove="onRemove"
       :on-preview="onPreview"
       :before-upload="beforeUpload"
       :limit="1"
+      list-type="picture-card"
       class="custom-upload"
       :class="fileList.length ? 'hide' : ''"
     >
       <i class="el-icon-plus"></i>
     </el-upload>
-    <el-dialog title="预览" width="50%" :visible.sync="previewImgDialog">
-      <img :src="imgUrl" class="previewImg" />
+    <el-dialog :visible.sync="previewImgDialog">
+      <img :src="imgUrl" />
     </el-dialog>
   </div>
 </template>
 
 <script>
-// SecretId: AKIDlNn134ziFZrzsVt1ujKgplTwA9tNcbLq
-
-// SecretKey: KPErIUR9cqsfDWZNwGLCn9G9mAJCqFPL
+// id: AKIDThiYZi4bhYJqJXIFjrVNL6dxHWYMl8cr
+// key: FK58KNAqGRNL8i30JL9kMpPkuSk3DuLn
 import COS from 'cos-js-sdk-v5'
 var cos = new COS({
-  SecretId: 'AKIDlNn134ziFZrzsVt1ujKgplTwA9tNcbLq',
-  SecretKey: 'KPErIUR9cqsfDWZNwGLCn9G9mAJCqFPL',
+  SecretId: 'AKIDThiYZi4bhYJqJXIFjrVNL6dxHWYMl8cr',
+  SecretKey: 'FK58KNAqGRNL8i30JL9kMpPkuSk3DuLn',
 })
 console.log(cos)
+
+// 在企业开发 id和key怎么获取,肯定不是明文
+// var cos = new COS({
+//   getAuthorization: async function (option, callback) {
+//     console.log('获取鉴权12')
+//     // 发送请求获取id和key
+//     const res = await axios.get('url')
+//     callback({
+//       TmpSecretId: res.tmpSecretId,
+//       TmpSecretKey: res.tmpSecretKey,
+//       SecurityToken: res.sessionToken,
+//       // 建议返回服务器时间作为签名的开始时间，避免用户浏览器本地时间偏差过大导致签名错误
+//       StartTime: res.startTime, // 时间戳，单位秒，如：1580000000
+//       ExpiredTime: res.expiredTime, // 时间戳，单位秒，如：1580000000
+//     })
+//   },
+// })
+// cos.putObject(
+//   {
+//     Bucket: 'examplebucket-1250000000' /* 必须 */,
+//     Region: 'COS_REGION' /* 存储桶所在地域，必须字段 */,
+//     Key: 'exampleobject' /* 必须 */,
+//     StorageClass: 'STANDARD',
+//     Body: '', // 上传文件对象
+//     onProgress: function (progressData) {
+//       console.log(JSON.stringify(progressData))
+//     },
+//   },
+//   function (err, data) {
+//     console.log(err || data)
+//   }
+// )
 export default {
   name: 'UploadImg',
   data() {
     return {
-      fileList: [
-        // {
-        //   name: 'food.jpg',
-        //   url: 'https://img2.baidu.com/it/u=1814268193,3619863984&fm=253&fmt=auto&app=138&f=JPEG?w=632&h=500',
-        // },
-      ],
+      fileList: [],
       previewImgDialog: false,
       imgUrl: '',
       loading: false,
@@ -54,61 +80,59 @@ export default {
   created() {},
 
   methods: {
-    onRequest(data) {
-      this.loading = true;
-      console.log('自己上传图片')
+    onRequest({ file }) {
+      this.loading = true
       cos.putObject(
         {
-          Bucket: 'caipaofan-1313341632' /* 必须 */,
+          Bucket: 'hrsaas-31-1302962993' /* 桶的名字 */,
           Region: 'ap-shanghai' /* 存储桶所在地域，必须字段 */,
-          Key: data.file.name /* 必须 */,
+          Key: file.name /* 必须 */,
           StorageClass: 'STANDARD',
-          Body: data.file, // 上传文件对象
+          Body: file, // 上传文件对象
           onProgress: function (progressData) {
             console.log(JSON.stringify(progressData))
           },
         },
         (err, data) => {
-          //成功或失败均进入此函数
-          //err null false 没有错
-          //err 不为null true 有错
-          this.loading = false;
-          if (err || data.statusCode != 200) {
-            return this.$message.error('亲，上传失败，请重试')
+          // 成功或值失败均进入该函数
+          // err null false 没有错
+          // err 不为null true 有错
+          this.loading = false
+          if (err || data.statusCode !== 200) {
+            return this.$message.error('亲,上传失败,请重试')
           }
           this.$emit('onSuccess', {
             url: 'https://' + data.Location,
           })
-          console.log(err || data)
-        },
+        }
       )
     },
     onChange(file, fileList) {
-      console.log(fileList)
       this.fileList = fileList
     },
     onRemove(file, fileList) {
-      console.log(fileList)
       this.fileList = fileList
     },
     onPreview(file) {
+      console.log(file)
       this.previewImgDialog = true
       this.imgUrl = file.url
     },
     beforeUpload(file) {
-      const type = ['image/jpeg', 'image/png', 'image/gif']
-      if (!type.includes(file.type)) {
-        this.$message.error('请选择' + type.join('、') + '图片')
+      // 可以上传的图片类型
+      const types = ['image/jpeg', 'image/gif']
+      if (!types.includes(file.type)) {
+        this.$message.error('请选择' + types.join('、') + '图片')
         return false
       }
 
-      const maxSize = 3 * 1024 * 1024
+      // 限制上传的图片大小
+      const maxSize = 2 * 1024 * 1024
       if (file.size > maxSize) {
-        this.$message.error('选择的图片不能超过2mb')
+        this.$message.error('选择的图片不能超出2mb')
         return false
       }
-
-      //   console.log('上传前检查', file)
+      // console.log('上传前的检查', file)
     },
   },
 }
@@ -118,12 +142,10 @@ export default {
 .hide .el-upload--picture-card {
   display: none;
 }
+
 .custom-upload {
   width: 148px;
   height: 148px;
   overflow: hidden;
-}
-.previewImg {
-  width: 100%;
 }
 </style>

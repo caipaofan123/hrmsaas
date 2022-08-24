@@ -1,72 +1,85 @@
 <template>
   <div class="dashboard-container">
     <div class="app-container">
-      <el-card class="box-card" v-loading="loading">
-        <treetools :treeNode="company" :isRoot="true" @add='dialogVisible=true'></treetools>
-        <el-tree :data="departs" :props="defaultProps" default-expand-all>
+      <el-card v-loading="loading" class="box-card">
+        <!-- 头部 -->
+        <tree-tools @add="showAddDept" :isRoot="true" :treeNode="company" />
+        <!-- 树形 -->
+        <el-tree :data="treeData" :props="defaultProps" default-expand-all>
+          <!-- 这是作用域插槽 -->
+          <!-- v-slot 获取组件内部slot提供的数据 -->
           <template v-slot="{ data }">
-            <treetools :treeNode="data" @remove='getDepts' 
-            @add='showAddDept'
-            @edit='showEditDept'
-            > </treetools>
+            <tree-tools
+              @add="showAddDept"
+              @remove="loadDepts"
+              @edit="showEdit"
+              :treeNode="data"
+            />
           </template>
         </el-tree>
       </el-card>
     </div>
-    <add-depts @add='getDepts' :visible.sync='dialogVisible' :currentNode='currentNode' ref="addDepts"></add-depts>
+
+    <!-- 添加部门弹层 -->
+    <add-dept
+      ref="addDept"
+      @add-success="loadDepts"
+      :visible.sync="dialogVisible"
+      :currentNode="currentNode"
+    />
   </div>
 </template>
 
 <script>
-import addDepts from './components/add-depts.vue'
-import { change } from '@/utils'
-import { getDeptsApi } from '@/api/department'
-import treetools from './components/tree-tools.vue'
-import { Loading } from 'element-ui'
+import TreeTools from './components/tree-tools.vue'
+import { getDeptsApi } from '@/api/departments'
+import { transListToTree } from '@/utils'
+import AddDept from './components/add-dept'
 export default {
   data() {
     return {
-      defaultProps: {
-        label: 'name',
-      },
-      departs: [
+      treeData: [
         { name: '总裁办', children: [{ name: '董事会' }] },
         { name: '行政部' },
         { name: '人事部' },
       ],
-      company: { name: '江苏传智播客教育科技股份有限公司', manager: '负责人' },
-      dialogVisible:false,
-      currentNode:{},
-      loading:false
+      defaultProps: {
+        label: 'name', // 将data中哪个数据名显示到树形页面中
+        // children: 'child', // 树形默认查找子节点通过childten
+      },
+      company: { name: '传智教育', manager: '负责人' },
+      dialogVisible: false,
+      currentNode: {},
+      loading: false,
     }
   },
+
   components: {
-    treetools,
-    addDepts
+    TreeTools,
+    AddDept,
   },
+
   created() {
-    this.getDepts()
+    this.loadDepts()
   },
 
   methods: {
-    async getDepts() {
-      this.loading=true
+    async loadDepts() {
+      this.loading = true
       const res = await getDeptsApi()
-      console.log(res)
-      this.departs = change(res.depts, '')
-      this.loading=false
+      this.treeData = transListToTree(res.depts, '')
+      this.loading = false
     },
-    showAddDept(val){
-      this.dialogVisible=true
-      this.currentNode=val
+    showAddDept(val) {
+      this.dialogVisible = true
+      this.currentNode = val
     },
-    showEditDept(val){
-      this.dialogVisible=true
-      this.$refs.addDepts.getDeptById(val.id)
-  
-    }
+    showEdit(val) {
+      this.dialogVisible = true
+      this.$refs.addDept.getDeptById(val.id)
+    },
   },
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="less"></style>

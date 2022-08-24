@@ -6,25 +6,28 @@
       @toggleClick="toggleSideBar"
     />
 
+    <!-- <breadcrumb class="breadcrumb-container" /> -->
     <div class="app-breadcrumb">
-      {{$store.state.user.userInfo.companyName}}
+      {{ $store.state.user.userInfo.companyName }}
       <span class="breadBtn">体验版</span>
     </div>
 
     <div class="right-menu">
+      <ToggleLang />
+      <full-screen></full-screen>
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
           <img
-            :src="$store.state.user.userInfo.staffPhoto"
-            class="user-avatar" 
+            :src="$store.getters.avatar"
+            class="user-avatar"
             v-imgError="defaultImg"
           />
-          <span>{{$store.state.user.userInfo.username}}</span>
+          <span>{{ $store.state.user.userInfo.username }}</span>
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
-            <el-dropdown-item>Home</el-dropdown-item>
+            <el-dropdown-item> Home </el-dropdown-item>
           </router-link>
           <el-dropdown-item divided @click.native="logout">
             <span style="display: block">Log Out</span>
@@ -39,13 +42,13 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-// import img from '@/assets/common/head.jpg'
+import defaultImg from '@/assets/common/head.jpg'
 
 export default {
-  data(){
-    return{
-      // defaultImg:img
-      defaultImg:'https://img2.baidu.com/it/u=3635204433,939208923&fm=253&fmt=auto&app=138&f=JPEG?w=375&h=500'
+  // 如果想在data中定义本地图片路径,需要先引入
+  data() {
+    return {
+      defaultImg,
     }
   },
   components: {
@@ -62,8 +65,6 @@ export default {
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
-      // this.$store.state.user.token=''
-      // this.$router.push('/login')
     },
   },
 }
@@ -77,24 +78,6 @@ export default {
   background-image: -webkit-linear-gradient(left, #3d6df8, #5b8cff);
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
-  .hamburger-container {
-    line-height: 46px;
-    height: 100%;
-    float: left;
-    cursor: pointer;
-    transition: background 0.3s;
-    color: hotpink;
-    fill: currentColor;
-    -webkit-tap-highlight-color: transparent;
-
-    &:hover {
-      background: rgba(0, 0, 0, 0.025);
-    }
-  }
-
-  .breadcrumb-container {
-    float: left;
-  }
   .app-breadcrumb {
     display: inline-block;
     font-size: 18px;
@@ -113,10 +96,31 @@ export default {
       margin-left: 15px;
     }
   }
+
+  .hamburger-container {
+    line-height: 46px;
+    height: 100%;
+    float: left;
+    cursor: pointer;
+    transition: background 0.3s;
+    -webkit-tap-highlight-color: transparent;
+    color: #fff;
+    fill: currentColor;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.025);
+    }
+  }
+
+  .breadcrumb-container {
+    float: left;
+  }
+
   .right-menu {
     float: right;
     height: 100%;
     line-height: 50px;
+    display: flex;
 
     &:focus {
       outline: none;
@@ -145,14 +149,15 @@ export default {
 
       .avatar-wrapper {
         position: relative;
-        // margin-top: 5px;
-        // 开启flex
         display: flex;
         align-items: center;
         color: #fff;
-        span{
-          margin: 0 8px;
+        cursor: pointer;
+
+        span {
+          margin: 0 3px;
         }
+
         .user-avatar {
           cursor: pointer;
           width: 40px;
@@ -164,12 +169,10 @@ export default {
           cursor: pointer;
           position: absolute;
           right: -20px;
-          // top: 25px;
           font-size: 12px;
         }
       }
     }
-  
   }
 }
 </style>

@@ -68,6 +68,7 @@ export default {
     }
   }
 
+  // 小图样式
   &.collapse {
     .sidebar-logo {
       margin-right: 0px;

@@ -6,21 +6,26 @@
           <el-button @click="showAddDialog('0', 1)">添加权限</el-button>
         </template>
       </page-tools>
+
       <el-table
         ref="table"
-        :data="permissions"
-        slot="right"
-        style="width: 100%"
         row-key="id"
+        :data="permissions"
+        style="width: 100%"
       >
-        <el-table-column prop="name" label="名称" width="180">
+        <el-table-column label="名称" width="180">
           <template v-slot="{ row }">
             <i
-              @click="expend(row)"
               v-if="row.children"
               style="margin-right: 5px"
               class="el-icon-folder-opened"
+              @click="expend(row)"
             ></i>
+            <!-- <i
+              v-if="row.type === 2"
+              class="el-icon-folder"
+              style="margin-right: 5px"
+            ></i> -->
             <span>{{ row.name }}</span>
           </template>
         </el-table-column>
@@ -73,20 +78,12 @@
 </template>
 
 <script>
-import { addPermission, getPermissionList } from '@/api/permission'
-import { change } from '@/utils'
+import { getPermissionList, addPermission } from '@/api/permission'
+import { transListToTree } from '@/utils'
 export default {
   data() {
     return {
       permissions: [],
-      rules: {
-        name: [
-          { required: true, message: '权限名称不能为空', trigger: 'blur' },
-        ],
-        code: [
-          { required: true, message: '权限标识不能为空', trigger: 'blur' },
-        ],
-      },
       formData: {
         name: '', // 名称
         code: '', // 标识
@@ -95,10 +92,18 @@ export default {
         pid: '', // 因为做的是树 需要知道添加到哪个节点下了
         enVisible: '0', // 开启
       },
+      rules: {
+        name: [
+          { required: true, message: '权限名称不能为空', trigger: 'blur' },
+        ],
+        code: [
+          { required: true, message: '权限标识不能为空', trigger: 'blur' },
+        ],
+      },
       showDialog: false,
     }
   },
-  props: {},
+
   created() {
     this.getPermissions()
   },
@@ -106,10 +111,10 @@ export default {
   methods: {
     async getPermissions() {
       const res = await getPermissionList()
-
-      this.permissions = change(res, '0')
+      this.permissions = transListToTree(res, '0')
     },
     expend(row) {
+      // console.log('点击展开', row)
       row.isExpand = !row.isExpand
       this.$refs.table.toggleRowExpansion(row, row.isExpand)
     },
@@ -120,9 +125,7 @@ export default {
     },
     onSave() {
       this.$refs.form.validate(async (valid) => {
-        if (!valid) {
-          return
-        }
+        if (!valid) return
         await addPermission(this.formData)
         this.$message.success('添加成功')
         this.showDialog = false
